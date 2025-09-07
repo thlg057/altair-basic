@@ -20,8 +20,19 @@ TEST_TARGET = $(BIN_DIR)/tests.exe
 SRCS = main.c repl.c error.c memory.c program.c token.c interpreter.c
 OBJS = $(addprefix $(BUILD_DIR)/, $(SRCS:.c=.o))
 
+# Pour les tests, on retire main.o
+OBJS_NO_MAIN = $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
+
 # Test sources
-TEST_SRCS = $(TESTS_DIR)/test_error.c $(TESTS_DIR)/test_memory.c $(TESTS_DIR)/test_runner.c
+TEST_SRCS = \
+    $(TESTS_DIR)/test_error.c \
+    $(TESTS_DIR)/test_memory.c \
+    $(TESTS_DIR)/test_token.c \
+    $(TESTS_DIR)/test_interpreter.c \
+    $(TESTS_DIR)/test_repl.c \
+    $(TESTS_DIR)/test_runner.c \
+    $(TESTS_DIR)/test_utilities.c
+
 TEST_OBJS = $(addprefix $(BUILD_DIR)/, $(notdir $(TEST_SRCS:.c=.o)))
 
 # Create build/bin directories if missing
@@ -54,9 +65,8 @@ $(BUILD_DIR)/%.o: $(TESTS_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Build test executable (no main.c)
-$(TEST_TARGET): $(BUILD_DIR)/repl.o $(BUILD_DIR)/error.o $(BUILD_DIR)/memory.o /
-				$(BUILD_DIR)/program.o $(BUILD_DIR)/token.o $(BUILD_DIR)/interpreter.o $(TEST_OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+$(TEST_TARGET): $(TEST_OBJS) $(OBJS_NO_MAIN)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 	strip $@
 
 # Run all tests

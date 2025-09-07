@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "error.h"
-#include "test_common.h"
+#include "test_utilities.h"
 
 int test_errorModule(void) {
     ASSERT(resultCodeToString(RESULT_OK) != NULL, "RESULT_OK should return a message");

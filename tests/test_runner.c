@@ -3,7 +3,12 @@
 // Déclarations des tests
 int test_errorModule(void);
 int test_memory(void);
-//int test_init_and_freeProgram(void);
+int test_tokenize_basic(void);
+int test_tokenize_operators(void);
+int test_interpret_end(void);
+int test_interpret_print(void);
+int test_interpret_goto(void);
+int test_repl_init_free(void);
 
 typedef int (*TestFunc)(void);
 
@@ -15,7 +20,13 @@ typedef struct {
 int main(void) {
     TestCase tests[] = {
         { "Module error", test_errorModule },
-        { "Module memory", test_memory }
+        { "Module memory", test_memory },
+        { "Token basic", test_tokenize_basic },
+        { "Token operators", test_tokenize_operators },
+        { "Interpreter END", test_interpret_end },
+        { "Interpreter PRINT", test_interpret_print },
+        { "Interpreter GOTO", test_interpret_goto },
+        { "REPL init/free", test_repl_init_free }
     };
 
     size_t numTests = sizeof(tests)/sizeof(tests[0]);

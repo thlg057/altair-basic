@@ -1,5 +1,5 @@
 #include "memory.h"
-#include "test_common.h"
+#include "test_utilities.h"
 
 int test_memory(void) {
     float *var;
