@@ -37,7 +37,7 @@ Main modules:
 - `main.c` → entry point, starts the REPL.
 - `common.h` → provides inline helper functions for strings, printing, and validation.
 - `error.c/.h` → error codes and string conversion.
-- `basic_repl.c/.h` → handles program lifecycle and REPL execution.
+- `repl.c/.h` → handles program lifecycle and REPL execution.
 - `program.c/.h` → manages storage of BASIC program lines.
 - `memory.c/.h` → variable storage and evaluation.
 - `token.c/.h` → breaks a raw line of BASIC code (string) into smaller pieces (tokens).
