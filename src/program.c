@@ -5,69 +5,124 @@
 #include <string.h>
 #include <stdlib.h>   // <-- pour free() et malloc()/strdup()
 
-#define LINE_MAX 80
-#define MAX_LINES 100
+#define MAX_LINES 50
+#define MAX_CMDLINE_SIZE 72
+#define MAX_LINE_SIZE 80
+#define MAX_UNSIGNED_INT 65535
 
-static char* program[MAX_LINES];
-static int lineCount = 0;
+typedef struct {
+    unsigned short line_number;
+    char text[MAX_CMDLINE_SIZE + 1]; // +1 pour le \0
+} BasicLine;
 
-ResultCode initProgram(void) {
-    lineCount = 0;
+typedef struct {
+    BasicLine lines[MAX_LINES];
+    unsigned char count; // suffisant car < 255
+} BasicProgram;
+
+static BasicProgram program;
+
+short parseLine(const char *input, unsigned short *line_number, char *code, size_t code_size) {
+    if (!input || !line_number || !code) {
+        return RESULT_ERROR;
+    }
+
+    while (*input == ' ' || *input == '\t') {
+        input++;
+    }
+
+    unsigned int num = 0;
+    if (*input < '0' || *input > '9') {
+        return RESULT_SYNTAX_ERROR;
+    }
+
+    while (*input >= '0' && *input <= '9') {
+        num = num * 10 + (*input - '0');
+        if (num > MAX_UNSIGNED_INT) {
+            return RESULT_SYNTAX_ERROR;
+        } 
+
+        input++;
+    }
+
+    *line_number = (unsigned short)num;
+    while (*input == ' ' || *input == '\t') {
+        input++;
+    }
+
+    size_t i = 0;
+    while (i < code_size - 1 && input[i] != '\0') {
+        code[i] = input[i];
+        i++;
+    }
+
+    code[i] = '\0';
     return RESULT_OK;
 }
 
-ResultCode freeProgram(void) {
-    for (int i = 0; i < lineCount; i++) {
-        free(program[i]);
+static short findIndex(unsigned short target_line) {
+    for (unsigned char j = 0; j < program.count; j++) {
+        if (program.lines[j].line_number == target_line) {
+            return j; 
+        }
     }
-    lineCount = 0;
+    return RESULT_ERROR;
+}
+
+static void sortProgram(void) {
+    for (unsigned char i = 1; i < program.count; i++) {
+        BasicLine key = program.lines[i];
+        char j = i - 1;
+        while (j >= 0 && program.lines[j].line_number > key.line_number) {
+            program.lines[j + 1] = program.lines[j];
+            j--;
+        }
+
+        program.lines[j + 1] = key;
+    }
+}
+
+ResultCode clearProgram(void) {
+    program.count = 0;
     return RESULT_OK;
 }
 
-static void addProgramLine(const char* line) {
-    if (lineCount < MAX_LINES) {
-        program[lineCount] = strdup(line);
-        lineCount++;
+ResultCode addLine(const char *line) {
+    if (program.count >= MAX_LINES) {
+        return RESULT_MEMORY_CAPACITY_ERROR;
     }
+
+    if (strCheckMaxSize(line, MAX_LINE_SIZE) != RESULT_OK) {
+        return RESULT_STRING_CAPACITY_ERROR;
+    }
+
+    ResultCode res;
+    unsigned short line_number;
+    char code[73];
+    res = parseLine(line, &line_number, code, sizeof(code));
+    if (res != RESULT_OK) {
+        return res;
+    }
+
+    program.lines[program.count].line_number = line_number;
+    strCopyTruncate(program.lines[program.count].text, code, MAX_CMDLINE_SIZE);
+    program.count++;
+    return RESULT_OK;
 }
 
-static void listProgram(void) {
-    for (int i = 0; i < lineCount; i++) {
-        printLine(program[i]);
-    }
+ResultCode runProgram(void) {
+    sortProgram();
+    return RESULT_OK;
 }
 
-ResultCode runREPL(void) {
-    char line[LINE_MAX];
-
-    while (1) {
-        putchar('>'); putchar(' '); // minimal prompt
-        if (!fgets(line, LINE_MAX, stdin)) return RESULT_PRG_STOPPED;
-
-        // strip newline
-        line[strcspn(line, "\r\n")] = 0;
-
-        if (myStrCaseCmp(line, "EXIT") == 0 || myStrCaseCmp(line, "STOP") == 0)
-            return RESULT_PRG_STOPPED;
-
-        if (myStrCaseCmp(line, "NEW") == 0) {
-            lineCount = 0;
-            printLine("New program cleared");
-            continue;
-        }
-
-        if (myStrCaseCmp(line, "LIST") == 0) {
-            listProgram();
-            continue;
-        }
-
-        if (myStrCaseCmp(line, "RUN") == 0) {
-            for (int i = 0; i < lineCount; i++) {
-                printLine(program[i]);
-            }
-            continue;
-        }
-
-        if (strlen(line) > 0) addProgramLine(line);
+ResultCode listProgram(void) {
+    sortProgram();
+    for (unsigned char i = 0; i < program.count; i++) {
+        print(program.lines[i].line_number, FALSE);
+        putchar(' ');
+        print(program.lines[i].text, TRUE);
     }
+
+    return RESULT_OK;
 }
+

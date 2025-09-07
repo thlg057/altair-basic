@@ -3,17 +3,14 @@
 #include "common.h"
 
 int main(void) {
-    printLine("Minimal BASIC Interpreter");
-    printLine("> ");
+    print("Minimal BASIC Interpreter", TRUE);
+    print("> ", TRUE);
 
-    if (initProgram() != RESULT_OK) return -1;
+    if (initREPL() != RESULT_OK) return -1;
 
     ResultCode res = runREPL();
+    print(resultCodeToString(res), TRUE);
 
-    if (res == RESULT_OK) printLine("Program ran successfully");
-    else if (res == RESULT_PRG_STOPPED) printLine("Program stopped by user");
-    else printLine("Unknown error");
-
-    freeProgram();
+    freeREPL();
     return 0;
 }
