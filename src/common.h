@@ -10,6 +10,28 @@ typedef enum {
     TRUE = 1
 } Boolean;
 
+static inline int isAlpha(char c) {
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+
+static inline int isDigit(char c) {
+    return (c >= '0' && c <= '9');
+}
+
+static inline int isSpace(char c) {
+    return c == ' ' || c == '\t';
+}
+
+static inline char toUpper(char c) {
+    if (c >= 'a' && c <= 'z') return c - 32;
+    return c;
+}
+
+static inline char toLower(char c) {
+    if (c >= 'A' && c <= 'Z') return c + 32;
+    return c;
+}
+
 // Minimal case-insensitive string compare
 static inline int strCaseCmp(const char* a, const char* b) {
     while (*a && *b) {

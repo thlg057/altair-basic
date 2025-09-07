@@ -17,7 +17,7 @@ DEBUG_TARGET = $(BIN_DIR)/basic_debug.exe
 TEST_TARGET = $(BIN_DIR)/tests.exe
 
 # Source files
-SRCS = main.c basic_repl.c error.c memory.c program.c
+SRCS = main.c basic_repl.c error.c memory.c program.c token.c interpreter.c
 OBJS = $(addprefix $(BUILD_DIR)/, $(SRCS:.c=.o))
 
 # Test sources
@@ -54,7 +54,8 @@ $(BUILD_DIR)/%.o: $(TESTS_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Build test executable (no main.c)
-$(TEST_TARGET): $(BUILD_DIR)/basic_repl.o $(BUILD_DIR)/error.o $(BUILD_DIR)/memory.o $(BUILD_DIR)/program.o $(TEST_OBJS)
+$(TEST_TARGET): $(BUILD_DIR)/basic_repl.o $(BUILD_DIR)/error.o $(BUILD_DIR)/memory.o /
+				$(BUILD_DIR)/program.o $(BUILD_DIR)/token.o $(BUILD_DIR)/interpreter.o $(TEST_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 	strip $@
 
@@ -69,6 +70,8 @@ $(BUILD_DIR)/basic_repl.o: $(SRC_DIR)/basic_repl.h
 $(BUILD_DIR)/error.o: $(SRC_DIR)/error.h
 $(BUILD_DIR)/memory.o: $(SRC_DIR)/memory.h
 $(BUILD_DIR)/program.o: $(SRC_DIR)/program.h
+$(BUILD_DIR)/token.o: $(SRC_DIR)/token.h
+$(BUILD_DIR)/interpreter.o: $(SRC_DIR)/interpreter.h
 
 # ------------------------------
 # Clean rules

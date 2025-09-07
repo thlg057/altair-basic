@@ -9,7 +9,8 @@ static const char* const errorMessages[] = {
     "Generic error",        // RESULT_ERROR
     "Syntax error",         // RESULT_SYNTAX_ERROR
     "Memory exceeded",      // RESULT_MEMORY_CAPACITY_ERROR
-    "String exceeded"       // RESULT_STRING_CAPACITY_ERROR 
+    "String exceeded",      // RESULT_STRING_CAPACITY_ERROR 
+    "Line not found"        // RESULT_LINE_NOT_FOUND_ERROR 
 };
 
 const char* resultCodeToString(ResultCode code) {

@@ -35,10 +35,13 @@ Makefile        # Build system
 
 Main modules:
 - `main.c` → entry point, starts the REPL.
-- `common.h` → common enums and inline basic common functions.
+- `common.h` → provides inline helper functions for strings, printing, and validation.
 - `error.c/.h` → error codes and string conversion.
 - `basic_repl.c/.h` → handles program lifecycle and REPL execution.
+- `program.c/.h` → manages storage of BASIC program lines.
 - `memory.c/.h` → variable storage and evaluation.
+- `token.c/.h` → breaks a raw line of BASIC code (string) into smaller pieces (tokens).
+- `interpreter.c/.h` → parses and executes BASIC commands.
 
 ---
 
@@ -141,7 +144,7 @@ HELLO WORLD
 - ✅ Core interpreter structure  
 - ✅ REPL loop  
 - ✅ Error handling system  
-- ⏳ Variable management  
+- ✅ Variable management  
 - ⏳ Parser and execution engine  
 - ⏳ String manipulation functions (`LEFT$`, `RIGHT$`, `MID$`)  
 - ⏳ File I/O commands  

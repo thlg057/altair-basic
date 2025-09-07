@@ -1,9 +1,10 @@
-#include "program.h"
-#include "error.h"
-#include "common.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>   // <-- pour free() et malloc()/strdup()
+#include "program.h"
+#include "error.h"
+#include "common.h"
+#include "interpreter.h"
 
 #define MAX_LINES 50
 #define MAX_CMDLINE_SIZE 72
@@ -66,7 +67,8 @@ static short findIndex(unsigned short target_line) {
             return j; 
         }
     }
-    return RESULT_ERROR;
+    
+    return RESULT_LINE_NOT_FOUND_ERROR;
 }
 
 static void sortProgram(void) {
@@ -104,14 +106,40 @@ ResultCode addLine(const char *line) {
         return res;
     }
 
-    program.lines[program.count].line_number = line_number;
-    strCopyTruncate(program.lines[program.count].text, code, MAX_CMDLINE_SIZE);
-    program.count++;
+    short index = findIndex(line_number);
+    if (index < 0) {
+        index = program.count;
+        program.count++;
+    }
+
+    program.lines[index].line_number = line_number;
+    strCopyTruncate(program.lines[index].text, code, MAX_CMDLINE_SIZE);
     return RESULT_OK;
 }
 
 ResultCode runProgram(void) {
     sortProgram();
+    unsigned char i = 0;
+    while (i < program.count) {
+        short result = interpret(program.lines[i].text);
+
+        if (result < 0) { // erreur
+            return result;
+        }
+
+        if (result > 0) { // GOTO
+            short index = findIndex((unsigned short)result);
+            if (index < 0) {
+                return RESULT_LINE_NOT_FOUND_ERROR;
+            }
+
+            i = (unsigned char)index;
+            continue;
+        }
+
+        i++; // ligne suivante
+    }
+
     return RESULT_OK;
 }
 
