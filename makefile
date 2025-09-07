@@ -17,11 +17,11 @@ DEBUG_TARGET = $(BIN_DIR)/basic_debug.exe
 TEST_TARGET = $(BIN_DIR)/tests.exe
 
 # Source files
-SRCS = main.c program.c error.c
+SRCS = main.c basic_repl.c error.c memory.c
 OBJS = $(addprefix $(BUILD_DIR)/, $(SRCS:.c=.o))
 
 # Test sources
-TEST_SRCS = $(TESTS_DIR)/test_error.c $(TESTS_DIR)/test_runner.c
+TEST_SRCS = $(TESTS_DIR)/test_error.c $(TESTS_DIR)/test_memory.c $(TESTS_DIR)/test_runner.c
 TEST_OBJS = $(addprefix $(BUILD_DIR)/, $(notdir $(TEST_SRCS:.c=.o)))
 
 # Create build/bin directories if missing
@@ -54,7 +54,7 @@ $(BUILD_DIR)/%.o: $(TESTS_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Build test executable (no main.c)
-$(TEST_TARGET): $(BUILD_DIR)/program.o $(BUILD_DIR)/error.o $(TEST_OBJS)
+$(TEST_TARGET): $(BUILD_DIR)/basic_repl.o $(BUILD_DIR)/error.o $(BUILD_DIR)/memory.o $(TEST_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 	strip $@
 
@@ -65,8 +65,9 @@ test: $(TEST_TARGET)
 # ------------------------------
 # Header dependencies
 # ------------------------------
-$(BUILD_DIR)/program.o: $(SRC_DIR)/program.h
+$(BUILD_DIR)/basic_repl.o: $(SRC_DIR)/basic_repl.h
 $(BUILD_DIR)/error.o: $(SRC_DIR)/error.h
+$(BUILD_DIR)/memory.o: $(SRC_DIR)/memory.h
 
 # ------------------------------
 # Clean rules
