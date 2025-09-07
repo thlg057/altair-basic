@@ -35,11 +35,9 @@ Makefile        # Build system
 
 Main modules:
 - `main.c` → entry point, starts the REPL.
-- `program.c/.h` → handles program lifecycle and REPL execution.
-- `interpreter.c/.h` → parsing and execution of BASIC statements.
-- `variables.c/.h` → variable storage and evaluation.
 - `error.c/.h` → error codes and string conversion.
-- `utils.c/.h` → utility functions shared across modules.
+- `basic_repl.c/.h` → handles program lifecycle and REPL execution.
+- `memory.c/.h` → variable storage and evaluation.
 
 ---
 
