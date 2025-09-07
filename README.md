@@ -35,6 +35,7 @@ Makefile        # Build system
 
 Main modules:
 - `main.c` → entry point, starts the REPL.
+- `common.h` → common enums and inline basic common functions.
 - `error.c/.h` → error codes and string conversion.
 - `basic_repl.c/.h` → handles program lifecycle and REPL execution.
 - `memory.c/.h` → variable storage and evaluation.

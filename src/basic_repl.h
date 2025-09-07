@@ -11,7 +11,7 @@
  *   RESULT_OK if initialization succeeded,
  *   negative ResultCode if an error occurred (e.g., memory allocation failure).
  */
-ResultCode initProgram(void);
+ResultCode initREPL(void);
 
 /**
  * Runs the main Read-Eval-Print Loop (REPL) for the BASIC interpreter.
@@ -33,6 +33,6 @@ ResultCode runREPL(void);
  *   RESULT_OK if cleanup succeeded,
  *   negative ResultCode if an error occurred during resource release.
  */
-ResultCode freeProgram(void);
+ResultCode freeREPL(void);
 
 #endif
