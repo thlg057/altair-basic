@@ -1,4 +1,4 @@
-#include "test_common.h"
+#include "test_utilities.h"
 
 void restoreStdin(void) {
 #ifdef _WIN32
