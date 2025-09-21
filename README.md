@@ -128,10 +128,43 @@ Run tests:
 make test
 ```
 
+Check binary size:
+```bash
+make size
+```
+
 Clean build:
 ```bash
 make clean
 ```
+
+---
+
+## Size Comparison: Then and Now
+
+Our BASIC interpreter achieves compact size through careful optimization:
+
+```
+----- Binary size -----
+   text    data     bss     dec     hex filename
+  16640    5040     336   22016    5600 bin/basic.exe
+Total size in KB: 21.50 KB
+```
+
+**Historical Reference**: The original Altair BASIC by Bill Gates and Paul Allen ran in just 4KB of RAM and was written entirely in **8080 assembly language** for maximum efficiency. This modern implementation, written in **C**, naturally requires more space due to:
+
+- **Language overhead**: C compiler generates more instructions than hand-optimized assembly
+- **Modern executable format**: Headers, symbol tables, and runtime requirements
+- **Enhanced error handling** and **comprehensive validation**
+- **Portability across platforms** rather than single-target optimization
+
+This implementation follows similar **minimalist design principles**:
+- **Custom mini-functions** replace standard library calls where possible
+- **Careful memory management** with fixed-size structures  
+- **Efficient parsing algorithms** with minimal overhead
+- **Modular architecture** prevents code bloat
+
+At 21.50 KB, this demonstrates that classic minimalist approaches remain valuable, even when trading assembly's raw efficiency for C's maintainability and portability.
 
 ---
 
