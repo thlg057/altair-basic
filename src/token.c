@@ -6,8 +6,8 @@ static inline Boolean isOperator(char c) {
     return c == '+' || c == '-' || c == '*' || c == '/' || c == '=';
 }
 
-short tokenize(const char *code, char *keyword, ParsedArg *args, int max_args) {
-    if (!code || !keyword || !args || max_args <= 0) return RESULT_ERROR;
+short tokenize(const char *code, char *keyword, ParsedArg *args, int maxArgs) {
+    if (!code || !keyword || !args || maxArgs <= 0) return RESULT_ERROR;
 
     while (isSpace(*code)) code++;
 
@@ -19,13 +19,13 @@ short tokenize(const char *code, char *keyword, ParsedArg *args, int max_args) {
 
     while (isSpace(*code)) code++;
 
-    int arg_count = 0;
-    while (*code && arg_count < max_args) {
+    int argCount = 0;
+    while (*code && argCount < maxArgs) {
         i = 0;
 
         if (isSpace(*code)) { code++; continue; }
 
-        ParsedArg *arg = &args[arg_count];
+        ParsedArg *arg = &args[argCount];
 
         if (*code == '"') {
             code++; // skip opening quote
@@ -35,7 +35,7 @@ short tokenize(const char *code, char *keyword, ParsedArg *args, int max_args) {
             arg->value[i] = '\0';
             arg->type = ARG_TYPE_STRING;
             if (*code == '"') code++;
-            arg_count++;
+            argCount++;
             continue;
         }
 
@@ -48,7 +48,7 @@ short tokenize(const char *code, char *keyword, ParsedArg *args, int max_args) {
             }
             arg->value[i] = '\0';
             arg->type = ARG_TYPE_NUMBER;
-            arg_count++;
+            argCount++;
             continue;
         }
 
@@ -56,7 +56,7 @@ short tokenize(const char *code, char *keyword, ParsedArg *args, int max_args) {
             arg->value[0] = *code++;
             arg->value[1] = '\0';
             arg->type = ARG_TYPE_OPERATOR;
-            arg_count++;
+            argCount++;
             continue;
         }
 
@@ -69,18 +69,18 @@ short tokenize(const char *code, char *keyword, ParsedArg *args, int max_args) {
         arg->value[i] = '\0';
 
         arg->type = ARG_TYPE_VARIABLE;
-        int is_num = 1;
+        int isNum = 1;
         for (int k = 0; arg->value[k]; k++) {
             if (!isDigit(arg->value[k])) {
-                is_num = 0;
+                isNum = 0;
                 break;
             }
         }
-        if (is_num) arg->type = ARG_TYPE_NUMBER;
+        if (isNum) arg->type = ARG_TYPE_NUMBER;
 
-        arg_count++;
+        argCount++;
     }
 
-    return arg_count;
+    return argCount;
 }
 

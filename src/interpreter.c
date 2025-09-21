@@ -17,31 +17,29 @@ typedef struct {
 } ForStackEntry;
 
 static ForStackEntry for_stack[MAX_FOR_STACK];
-static int for_stack_top = 0;
+static int forStackTop = 0;
 
 void resetForStack(void) {
-    for_stack_top = 0;
+    forStackTop = 0;
 }
 
 short doPrint(ParsedArg args[], short count) {
-    char str_result[128] = {0};
-    float num_result = 0;
+    char strResult[128] = {0};
+    float numResult = 0;
     ResultCode rc;
 
-    // Tente d'évaluer comme concaténation ou numérique
-    rc = evalExpression(args, count, str_result, &num_result, NULL);
+    rc = evalExpression(args, count, strResult, &numResult, NULL);
     if (rc != RESULT_OK) {
         return rc;
     }
 
-    if (str_result[0]) {
-        print(str_result, TRUE);
+    if (strResult[0]) {
+        print(strResult, TRUE);
         return RESULT_OK;
     }
 
-    // Si pas de chaîne, affiche le résultat numérique
     char buf[32];
-    mini_itoa((int)num_result, buf);
+    mini_itoa((int)numResult, buf);
     print(buf, TRUE);
     return RESULT_OK;
 }
@@ -65,27 +63,27 @@ short doLet(ParsedArg args[], short count) {
     if (!args[0].value || *args[0].value == '\0' || args[0].type != ARG_TYPE_VARIABLE) return RESULT_ERROR; 
     if (args[1].type != ARG_TYPE_OPERATOR || args[1].value[0] != '=') return RESULT_ERROR;
     
-    float num_result = 0;
+    float numResult = 0;
     ResultCode rc;
-    rc = evalExpression(args + 2, count - 2, NULL, &num_result, NULL);
+    rc = evalExpression(args + 2, count - 2, NULL, &numResult, NULL);
     if (rc != RESULT_OK) {
         return rc;
     }
 
-    *getVariable(args[0].value) = num_result;
+    *getVariable(args[0].value) = numResult;
     return RESULT_OK;
 }
 
 short doIf(ParsedArg args[], short count) {
     if (count < 3) return RESULT_ERROR;
-    int cond_end = count - 2;
-    if (mini_strcmp(args[cond_end].value, "GOTO") != 0 ) return RESULT_ERROR;
+    int condEnd = count - 2;
+    if (mini_strcmp(args[condEnd].value, "GOTO") != 0 ) return RESULT_ERROR;
 
-    int cond_result = 0;
-    ResultCode rc = evalExpression(args, cond_end, NULL, NULL, &cond_result);
+    int condResult = 0;
+    ResultCode rc = evalExpression(args, condEnd, NULL, NULL, &condResult);
     if (rc != RESULT_OK) return rc;
 
-    if (cond_result) {
+    if (condResult) {
         return doGoto(&args[count-1], 1);
     }
 
@@ -111,7 +109,7 @@ short doInput(ParsedArg args[], short count) {
 
 short doFor(ParsedArg args[], short count, unsigned short current_line, GetNextLineFunc getNextLine) {
     if (count < 5) return RESULT_SYNTAX_ERROR;
-    if (for_stack_top >= MAX_FOR_STACK) return RESULT_MEMORY_CAPACITY_ERROR;
+    if (forStackTop >= MAX_FOR_STACK) return RESULT_MEMORY_CAPACITY_ERROR;
 
     if (args[1].type != ARG_TYPE_OPERATOR || args[1].value[0] != '=') return RESULT_SYNTAX_ERROR;
 
@@ -125,9 +123,9 @@ short doFor(ParsedArg args[], short count, unsigned short current_line, GetNextL
         if (step == 0.0f) return RESULT_SYNTAX_ERROR;
     }
 
-    short next_line = getNextLine(current_line);
-    if (next_line < 0) {
-        return next_line;
+    short nextLine = getNextLine(current_line);
+    if (nextLine < 0) {
+        return nextLine;
     }
 
     float start = mini_atof(args[2].value);
@@ -137,19 +135,19 @@ short doFor(ParsedArg args[], short count, unsigned short current_line, GetNextL
     if (!var) return RESULT_ERROR;
     *var = start;
 
-    mini_strcpy(for_stack[for_stack_top].var_name, args[0].value);
-    for_stack[for_stack_top].end_value = end;
-    for_stack[for_stack_top].step = step;
-    for_stack[for_stack_top].for_line = (unsigned short)next_line;
-    for_stack_top++;
+    mini_strcpy(for_stack[forStackTop].var_name, args[0].value);
+    for_stack[forStackTop].end_value = end;
+    for_stack[forStackTop].step = step;
+    for_stack[forStackTop].for_line = (unsigned short)nextLine;
+    forStackTop++;
 
     return RESULT_OK;
 }
 
 short doNext(ParsedArg args[], short count) {
-    if (for_stack_top <= 0) return RESULT_ERROR;
+    if (forStackTop <= 0) return RESULT_ERROR;
 
-    ForStackEntry* entry = &for_stack[for_stack_top - 1];
+    ForStackEntry* entry = &for_stack[forStackTop - 1];
     if (mini_strcmp(entry->var_name, args[0].value) != 0) return RESULT_ERROR;
 
     float* var = getVariable(entry->var_name);
@@ -158,7 +156,7 @@ short doNext(ParsedArg args[], short count) {
 
     int finished = (entry->step > 0) ? (*var > entry->end_value) : (*var < entry->end_value);
     if (finished) {
-        for_stack_top--;
+        forStackTop--;
         return RESULT_OK;
     } 
 

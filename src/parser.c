@@ -15,12 +15,12 @@ static const ParsedArg* current(TokenStream* ts) {
 
 static void next(TokenStream* ts) { ts->pos++; }
 
-static ResultCode parseFactor(TokenStream* ts, float* out_num, char* out_str) {
+static ResultCode parseFactor(TokenStream* ts, float* outNum, char* outStr) {
     const ParsedArg* tok = current(ts);
     if (!tok) return RESULT_SYNTAX_ERROR;
 
     if (tok->type == ARG_TYPE_NUMBER) {
-        if (out_num) *out_num = (float)mini_atoi(tok->value);
+        if (outNum) *outNum = (float)mini_atoi(tok->value);
         next(ts);
         return RESULT_OK;
     } 
@@ -28,13 +28,13 @@ static ResultCode parseFactor(TokenStream* ts, float* out_num, char* out_str) {
     if (tok->type == ARG_TYPE_VARIABLE) {
         float* var = getVariable(tok->value);
         if (!var) return RESULT_ERROR;
-        if (out_num) *out_num = *var;
+        if (outNum) *outNum = *var;
         next(ts);
         return RESULT_OK;
     } 
     
     if (tok->type == ARG_TYPE_STRING) {
-        if (out_str) mini_strcpy(out_str, tok->value);
+        if (outStr) mini_strcpy(outStr, tok->value);
         next(ts);
         return RESULT_OK;
     }
@@ -42,7 +42,7 @@ static ResultCode parseFactor(TokenStream* ts, float* out_num, char* out_str) {
     return RESULT_SYNTAX_ERROR;
 }
 
-static ResultCode parseTerm(TokenStream* ts, float* out_num) {
+static ResultCode parseTerm(TokenStream* ts, float* outNum) {
     float left;
     ResultCode rc = parseFactor(ts, &left, NULL);
     if (rc != RESULT_OK) return rc;
@@ -68,11 +68,11 @@ static ResultCode parseTerm(TokenStream* ts, float* out_num) {
             break;
         }
     }
-    *out_num = left;
+    *outNum = left;
     return RESULT_OK;
 }
 
-static ResultCode parseExpr(TokenStream* ts, float* out_num) {
+static ResultCode parseExpr(TokenStream* ts, float* outNum) {
     float left;
     ResultCode rc = parseTerm(ts, &left);
     if (rc != RESULT_OK) return rc;
@@ -93,11 +93,11 @@ static ResultCode parseExpr(TokenStream* ts, float* out_num) {
             break;
         }
     }
-    *out_num = left;
+    *outNum = left;
     return RESULT_OK;
 }
 
-static ResultCode parseComparison(TokenStream* ts, int* out_bool) {
+static ResultCode parseComparison(TokenStream* ts, int* outBool) {
     for (int i = 0; i < ts->count; i++) {
         if (ts->args[i].type == ARG_TYPE_OPERATOR && mini_strcmp(ts->args[i].value, "=") == 0) {
             TokenStream left = { ts->args, i, 0 };
@@ -106,19 +106,19 @@ static ResultCode parseComparison(TokenStream* ts, int* out_bool) {
             ResultCode rc1 = parseExpr(&left, &lval);
             ResultCode rc2 = parseExpr(&right, &rval);
             if (rc1 != RESULT_OK || rc2 != RESULT_OK) return RESULT_ERROR;
-            if (out_bool) *out_bool = (lval == rval);
+            if (outBool) *outBool = (lval == rval);
             return RESULT_OK;
         }
     }
     return RESULT_ERROR;
 }
 
-static ResultCode parseConcat(const ParsedArg* args, int count, char* out_str) {
-    if (!out_str) return RESULT_ERROR;
-    out_str[0] = '\0';
+static ResultCode parseConcat(const ParsedArg* args, int count, char* outStr) {
+    if (!outStr) return RESULT_ERROR;
+    outStr[0] = '\0';
     for (int i = 0; i < count; i++) {
         if (args[i].type == ARG_TYPE_STRING || args[i].type == ARG_TYPE_NUMBER) {
-            mini_strcat(out_str, args[i].value);
+            mini_strcat(outStr, args[i].value);
             continue;
         } 
         
@@ -127,7 +127,7 @@ static ResultCode parseConcat(const ParsedArg* args, int count, char* out_str) {
             if (!var) return RESULT_ERROR;
             char buf[12];
             mini_itoa((int)(*var), buf);
-            mini_strcat(out_str, buf);
+            mini_strcat(outStr, buf);
         }
     }
     return RESULT_OK;

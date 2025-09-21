@@ -24,8 +24,8 @@ typedef struct {
 
 static BasicProgram program;
 
-short parseLine(const char *input, unsigned short *line_number, char *code, size_t code_size) {
-    if (!input || !line_number || !code) {
+short parseLine(const char *input, unsigned short *lineNumber, char *code, size_t codeSize) {
+    if (!input || !lineNumber || !code) {
         return RESULT_ERROR;
     }
 
@@ -47,13 +47,13 @@ short parseLine(const char *input, unsigned short *line_number, char *code, size
         input++;
     }
 
-    *line_number = (unsigned short)num;
+    *lineNumber = (unsigned short)num;
     while (*input == ' ' || *input == '\t') {
         input++;
     }
 
     size_t i = 0;
-    while (i < code_size - 1 && input[i] != '\0') {
+    while (i < codeSize - 1 && input[i] != '\0') {
         code[i] = input[i];
         i++;
     }
@@ -62,9 +62,9 @@ short parseLine(const char *input, unsigned short *line_number, char *code, size
     return RESULT_OK;
 }
 
-static short findIndex(unsigned short target_line) {
+static short findIndex(unsigned short targetLine) {
     for (unsigned char j = 0; j < program.count; j++) {
-        if (program.lines[j].line_number == target_line) {
+        if (program.lines[j].line_number == targetLine) {
             return j; 
         }
     }
@@ -102,20 +102,20 @@ ResultCode addLine(const char *line) {
     }
 
     ResultCode res;
-    unsigned short line_number;
+    unsigned short lineNumber;
     char code[73];
-    res = parseLine(line, &line_number, code, sizeof(code));
+    res = parseLine(line, &lineNumber, code, sizeof(code));
     if (res != RESULT_OK) {
         return res;
     }
 
-    short index = findIndex(line_number);
+    short index = findIndex(lineNumber);
     if (index < 0) {
         index = program.count;
         program.count++;
     }
 
-    program.lines[index].line_number = line_number;
+    program.lines[index].line_number = lineNumber;
     strCopyTruncate(program.lines[index].text, code, MAX_CMDLINE_SIZE);
     return RESULT_OK;
 }
