@@ -24,3 +24,12 @@ float* getVariable(const char *name) {
 
     return &variables[index];
 }
+
+/**
+ * Resets all BASIC variables to 0.
+ */
+void resetAllVariables(void) {
+    for (int i = 0; i < MAX_VARIABLES; ++i) {
+        variables[i] = 0;
+    }
+}

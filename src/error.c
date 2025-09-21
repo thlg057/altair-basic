@@ -1,7 +1,6 @@
 #include "error.h"
-#include <stdlib.h>  // for abs()
+#include <stdlib.h>
 
-// Minimal mapping of ResultCode to strings
 static const char errorMessages[] =
     "OK\0"
     "Program exited\0"

@@ -3,6 +3,9 @@
 
 #include <stddef.h> // for size_t
 #include <stdio.h>  // for putchar
+#if defined(_WIN32) || defined(_WIN64)
+#include <io.h>
+#endif
 #include "error.h"
 
 typedef enum {
@@ -96,5 +99,100 @@ static inline void printUnsigned(unsigned short n, Boolean newline) {
     char*: printStr, \
     unsigned short: printUnsigned \
 )(x, newline)
+
+/**
+ * Minimal string copy (null-terminated).
+ * Returns dest.
+ */
+static inline char* mini_strcpy(char* dest, const char* src) {
+    char* d = dest;
+    while ((*d++ = *src++));
+    return dest;
+}
+
+/**
+ * Minimal string concatenation (null-terminated).
+ * Returns dest.
+ */
+static inline char* mini_strcat(char* dest, const char* src) {
+    char* d = dest;
+    while (*d) d++;
+    while ((*d++ = *src++));
+    return dest;
+}
+
+/**
+ * Minimal string compare (case-sensitive).
+ * Returns 0 if equal, <0 if s1<s2, >0 if s1>s2.
+ */
+static inline int mini_strcmp(const char* s1, const char* s2) {
+    while (*s1 && (*s1 == *s2)) { s1++; s2++; }
+    return *(unsigned char*)s1 - *(unsigned char*)s2;
+}
+
+/**
+ * Minimal ASCII to integer conversion (no float support).
+ */
+static inline int mini_atoi(const char* s) {
+    int r = 0, sign = 1;
+    if (*s == '-') { sign = -1; s++; }
+    while (*s >= '0' && *s <= '9') {
+        r = r * 10 + (*s - '0');
+        s++;
+    }
+    return r * sign;
+}
+
+/**
+ * Minimal integer to string conversion (base 10).
+ * Returns dest.
+ */
+static inline char* mini_itoa(int n, char* dest) {
+    char buf[12];
+    int i = 0, sign = n < 0;
+    if (sign) n = -n;
+    do { buf[i++] = '0' + (n % 10); n /= 10; } while (n);
+    if (sign) buf[i++] = '-';
+    int j = 0;
+    while (i--) dest[j++] = buf[i];
+    dest[j] = 0;
+    return dest;
+}
+
+/**
+ * Minimal ASCII to float conversion.
+ * Handles optional sign, integer and fractional part (no exponent, no locale).
+ */
+static inline float mini_atof(const char* s) {
+    float result = 0.0f, factor = 1.0f;
+    int sign = 1;
+
+    // Skip leading spaces
+    while (*s == ' ' || *s == '\t') s++;
+
+    // Handle sign
+    if (*s == '-') { sign = -1; s++; }
+    else if (*s == '+') { s++; }
+
+    // Integer part
+    while (*s >= '0' && *s <= '9') {
+        result = result * 10.0f + (*s - '0');
+        s++;
+    }
+
+    // Fractional part
+    if (*s == '.') {
+        s++;
+        float frac = 0.0f, base = 0.1f;
+        while (*s >= '0' && *s <= '9') {
+            frac += (*s - '0') * base;
+            base *= 0.1f;
+            s++;
+        }
+        result += frac;
+    }
+
+    return sign * result;
+}
 
 #endif

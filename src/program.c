@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>   // <-- pour free() et malloc()/strdup()
+#include <stdlib.h>
 #include "program.h"
 #include "error.h"
 #include "common.h"
 #include "interpreter.h"
+#include "memory.h"
 
 #define MAX_LINES 50
 #define MAX_CMDLINE_SIZE 72
@@ -13,12 +14,12 @@
 
 typedef struct {
     unsigned short line_number;
-    char text[MAX_CMDLINE_SIZE + 1]; // +1 pour le \0
+    char text[MAX_CMDLINE_SIZE + 1];
 } BasicLine;
 
 typedef struct {
     BasicLine lines[MAX_LINES];
-    unsigned char count; // suffisant car < 255
+    unsigned char count;
 } BasicProgram;
 
 static BasicProgram program;
@@ -86,6 +87,8 @@ static void sortProgram(void) {
 
 ResultCode clearProgram(void) {
     program.count = 0;
+    resetAllVariables();
+    resetForStack();
     return RESULT_OK;
 }
 
@@ -117,17 +120,33 @@ ResultCode addLine(const char *line) {
     return RESULT_OK;
 }
 
+short getNextLineNumber(unsigned short current_line) {
+    short index = findIndex(current_line);
+    if (index < 0) {
+        return index;
+    }
+
+    index++;
+    if (index >= program.count) {
+        return RESULT_LINE_NOT_FOUND_ERROR;  
+    }
+
+    return program.lines[index].line_number;
+}
+
 ResultCode runProgram(void) {
     sortProgram();
+    resetAllVariables();
+    resetForStack();
     unsigned char i = 0;
     while (i < program.count) {
-        short result = interpret(program.lines[i].text);
+        short result = interpret(program.lines[i].text, program.lines[i].line_number, getNextLineNumber);
 
-        if (result < 0) { // erreur
+        if (result < 0) {
             return result;
         }
 
-        if (result > 0) { // GOTO
+        if (result > 0) {
             short index = findIndex((unsigned short)result);
             if (index < 0) {
                 return RESULT_LINE_NOT_FOUND_ERROR;
@@ -137,7 +156,7 @@ ResultCode runProgram(void) {
             continue;
         }
 
-        i++; // ligne suivante
+        i++;
     }
 
     return RESULT_OK;
