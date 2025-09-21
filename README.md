@@ -1,7 +1,7 @@
 # BASIC Interpreter (C Implementation)
 
 ## Overview
-This project is a lightweight **BASIC interpreter written in C**, inspired by the original implementation of Bill Gates and Paul Allen in the 1970s.  
+This project is a lightweight **BASIC interpreter written in C**, inspired by the original **Altair BASIC** implementation of Bill Gates and Paul Allen in the 1970s. Altair BASIC was the first Microsoft product and one of the first BASIC interpreters for microcomputers, originally developed for the Altair 8800.
 
 The main objectives are:
 - Stay close to the **minimalistic philosophy** of early microcomputer interpreters.  
@@ -42,6 +42,7 @@ Main modules:
 - `memory.c/.h` → variable storage and evaluation.
 - `token.c/.h` → breaks a raw line of BASIC code (string) into smaller pieces (tokens).
 - `interpreter.c/.h` → parses and executes BASIC commands.
+- `parser.c/.h` → interpret parameters.
 
 ---
 
@@ -50,27 +51,40 @@ Main modules:
 This interpreter supports the **keywords and syntax of the early Microsoft BASIC** (circa 1975).  
 
 ### Program Control
-- `RUN` → execute the loaded program.  
-- `LIST` → display the current program.  
-- `NEW` → clear program memory.  
-- `STOP` → stop execution.  
-- `END` → terminate program execution.  
+- ✅`RUN` → execute the loaded program.  
+- ✅`LIST` → display the current program.  
+- ✅`NEW` → clear program memory.  
+- ✅`STOP` → stop execution.  
+- ✅`END` → terminate program execution.  
 
 ### Input/Output
-- `PRINT <expr>` → output expression(s) to console.  
-- `INPUT <var>` → read value from user input.  
+- ✅`PRINT <expr>` → output expression(s) to console.  
+- ✅`INPUT <var>` → read value from user input.  
 
 ### Variables & Expressions
-- Integer and string variables (`A`, `X1`, `STR$`).  
-- Assignment with `LET` (optional, `LET A=5` or `A=5`).  
-- Basic arithmetic operators: `+`, `-`, `*`, `/`.  
+- ✅Numeric variables (`A`, `X1`).  
+- ✅Assignment with `LET` (`LET A=5`).  
+- ✅Basic arithmetic operators: `+`, `-`, `*`, `/`.  
 
 ### Control Flow
-- `IF <expr> THEN <line>` → conditional branching.  
-- `GOTO <line>` → jump to a program line.  
-- `GOSUB <line>` / `RETURN` → subroutine calls.  
-- `FOR <var>=<start> TO <end> [STEP <n>]` → loops.  
-- `NEXT <var>` → end of loop.  
+- ✅`IF <expr> THEN <line>` → conditional branching.  
+- ✅`GOTO <line>` → jump to a program line.  
+- ⏳`GOSUB <line>` / `RETURN` → subroutine calls.  
+- ⏳`FOR <var>=<start> TO <end> [STEP <n>]` → loops.  
+- ⏳`NEXT <var>` → end of loop.  
+
+---
+
+## Historical Context: Altair BASIC
+
+This interpreter pays homage to **Altair BASIC**, the legendary programming language that launched Microsoft in 1975. Originally written by Bill Gates and Paul Allen for the MITS Altair 8800, Altair BASIC was revolutionary for several reasons:
+
+- **First commercial BASIC for microcomputers**: Made programming accessible to hobbyists and small computer users.
+- **Efficient memory usage**: Designed to run in just 4KB of RAM, showcasing extreme optimization techniques.
+- **Foundation of Microsoft**: This interpreter became Microsoft's first product and established the company's software licensing model.
+- **Influenced the industry**: Set the standard for BASIC implementations on early personal computers.
+
+Our implementation aims to capture the **minimalist spirit** and **architectural elegance** of that pioneering software, while adapting it for modern C development practices.
 
 ---
 
@@ -79,10 +93,13 @@ All functions return a `ResultCode`:
 ```c
 typedef enum {
     RESULT_OK = 0,
-    RESULT_ERROR = -1,
-    RESULT_MEMORY_CAPACITY_ERROR = -2,
-    RESULT_STRING_CAPACITY_ERROR = -3,
-    RESULT_PRG_STOPPED = -4
+    RESULT_PRG_STOPPED = -1,
+    RESULT_UNKNOW_ERROR = -2,
+    RESULT_ERROR = -3,
+    RESULT_SYNTAX_ERROR = -4,
+    RESULT_MEMORY_CAPACITY_ERROR = -5,
+    RESULT_STRING_CAPACITY_ERROR = -6,
+    RESULT_LINE_NOT_FOUND_ERROR = -7
 } ResultCode;
 ```
 
@@ -137,7 +154,23 @@ HELLO WORLD
 4
 5
 ```
+```basic
+10 LET A = 10
+20 GOTO 40
+30 LET A = 20
+40 IF A = 10 THEN 70
+50 PRINT "round 2: " + A
+60 END
+70 PRINT "round 1: " + A
+80 GOTO 30
+RUN
+```
 
+Output:
+```
+round 1: 10
+round 2: 20
+```
 ---
 
 ## Roadmap
@@ -145,9 +178,7 @@ HELLO WORLD
 - ✅ REPL loop  
 - ✅ Error handling system  
 - ✅ Variable management  
-- ⏳ Parser and execution engine  
-- ⏳ String manipulation functions (`LEFT$`, `RIGHT$`, `MID$`)  
-- ⏳ File I/O commands  
+- ⏳ Parser and execution engine
 
 ---
 
