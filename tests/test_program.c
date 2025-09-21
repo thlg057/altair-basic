@@ -1,13 +1,7 @@
 #include <stdio.h>
 #include "program.h"
 #include "error.h"
-
-#define ASSERT(cond, msg) do { \
-    if (!(cond)) { \
-        printf("Test failed: %s\n", msg); \
-        return -1; \
-    } \
-} while(0)
+#include "test_utilities.h"
 
 int test_init_and_freeProgram(void) {
     ResultCode res;
@@ -18,5 +12,5 @@ int test_init_and_freeProgram(void) {
     res = freeProgram();
     ASSERT(res == RESULT_OK, "freeProgram should return RESULT_OK");
 
-    return 0;
+    return TEST_OK;
 }

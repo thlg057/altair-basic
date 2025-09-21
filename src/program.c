@@ -1,30 +1,35 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>   // <-- pour free() et malloc()/strdup()
+#include <stdlib.h>
 #include "program.h"
 #include "error.h"
 #include "common.h"
 #include "interpreter.h"
+#include "memory.h"
 
+// Maximum number of BASIC program lines that can be stored
 #define MAX_LINES 50
+// Maximum length of a command line (excluding line number)
 #define MAX_CMDLINE_SIZE 72
+// Maximum total length of an input line (including line number)
 #define MAX_LINE_SIZE 80
+// Maximum value for unsigned short (65535)
 #define MAX_UNSIGNED_INT 65535
 
 typedef struct {
     unsigned short line_number;
-    char text[MAX_CMDLINE_SIZE + 1]; // +1 pour le \0
+    char text[MAX_CMDLINE_SIZE + 1];
 } BasicLine;
 
 typedef struct {
     BasicLine lines[MAX_LINES];
-    unsigned char count; // suffisant car < 255
+    unsigned char count;
 } BasicProgram;
 
 static BasicProgram program;
 
-short parseLine(const char *input, unsigned short *line_number, char *code, size_t code_size) {
-    if (!input || !line_number || !code) {
+short parseLine(const char *input, unsigned short *lineNumber, char *code, size_t codeSize) {
+    if (!input || !lineNumber || !code) {
         return RESULT_ERROR;
     }
 
@@ -46,13 +51,13 @@ short parseLine(const char *input, unsigned short *line_number, char *code, size
         input++;
     }
 
-    *line_number = (unsigned short)num;
+    *lineNumber = (unsigned short)num;
     while (*input == ' ' || *input == '\t') {
         input++;
     }
 
     size_t i = 0;
-    while (i < code_size - 1 && input[i] != '\0') {
+    while (i < codeSize - 1 && input[i] != '\0') {
         code[i] = input[i];
         i++;
     }
@@ -61,9 +66,9 @@ short parseLine(const char *input, unsigned short *line_number, char *code, size
     return RESULT_OK;
 }
 
-static short findIndex(unsigned short target_line) {
+static short findIndex(unsigned short targetLine) {
     for (unsigned char j = 0; j < program.count; j++) {
-        if (program.lines[j].line_number == target_line) {
+        if (program.lines[j].line_number == targetLine) {
             return j; 
         }
     }
@@ -73,19 +78,25 @@ static short findIndex(unsigned short target_line) {
 
 static void sortProgram(void) {
     for (unsigned char i = 1; i < program.count; i++) {
-        BasicLine key = program.lines[i];
+        unsigned short key_num = program.lines[i].line_number;
+        char key_text[MAX_CMDLINE_SIZE + 1];
+        strcpy(key_text, program.lines[i].text);
+        
         char j = i - 1;
-        while (j >= 0 && program.lines[j].line_number > key.line_number) {
+        while (j >= 0 && program.lines[j].line_number > key_num) {
             program.lines[j + 1] = program.lines[j];
             j--;
         }
-
-        program.lines[j + 1] = key;
+        
+        program.lines[j + 1].line_number = key_num;
+        strcpy(program.lines[j + 1].text, key_text);
     }
 }
 
 ResultCode clearProgram(void) {
     program.count = 0;
+    resetAllVariables();
+    resetForStack();
     return RESULT_OK;
 }
 
@@ -99,35 +110,51 @@ ResultCode addLine(const char *line) {
     }
 
     ResultCode res;
-    unsigned short line_number;
+    unsigned short lineNumber;
     char code[73];
-    res = parseLine(line, &line_number, code, sizeof(code));
+    res = parseLine(line, &lineNumber, code, sizeof(code));
     if (res != RESULT_OK) {
         return res;
     }
 
-    short index = findIndex(line_number);
+    short index = findIndex(lineNumber);
     if (index < 0) {
         index = program.count;
         program.count++;
     }
 
-    program.lines[index].line_number = line_number;
+    program.lines[index].line_number = lineNumber;
     strCopyTruncate(program.lines[index].text, code, MAX_CMDLINE_SIZE);
     return RESULT_OK;
 }
 
+short getNextLineNumber(unsigned short current_line) {
+    short index = findIndex(current_line);
+    if (index < 0) {
+        return index;
+    }
+
+    index++;
+    if (index >= program.count) {
+        return RESULT_LINE_NOT_FOUND_ERROR;  
+    }
+
+    return program.lines[index].line_number;
+}
+
 ResultCode runProgram(void) {
     sortProgram();
+    resetAllVariables();
+    resetForStack();
     unsigned char i = 0;
     while (i < program.count) {
-        short result = interpret(program.lines[i].text);
+        short result = interpret(program.lines[i].text, program.lines[i].line_number, getNextLineNumber);
 
-        if (result < 0) { // erreur
+        if (result < 0) {
             return result;
         }
 
-        if (result > 0) { // GOTO
+        if (result > 0) {
             short index = findIndex((unsigned short)result);
             if (index < 0) {
                 return RESULT_LINE_NOT_FOUND_ERROR;
@@ -137,7 +164,7 @@ ResultCode runProgram(void) {
             continue;
         }
 
-        i++; // ligne suivante
+        i++;
     }
 
     return RESULT_OK;

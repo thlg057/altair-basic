@@ -17,7 +17,7 @@ DEBUG_TARGET = $(BIN_DIR)/basic_debug.exe
 TEST_TARGET = $(BIN_DIR)/tests.exe
 
 # Source files
-SRCS = main.c repl.c error.c memory.c program.c token.c interpreter.c
+SRCS = main.c repl.c error.c memory.c program.c token.c interpreter.c parser.c
 OBJS = $(addprefix $(BUILD_DIR)/, $(SRCS:.c=.o))
 
 # Pour les tests, on retire main.o
@@ -30,6 +30,7 @@ TEST_SRCS = \
     $(TESTS_DIR)/test_token.c \
     $(TESTS_DIR)/test_interpreter.c \
     $(TESTS_DIR)/test_repl.c \
+    $(TESTS_DIR)/test_parser.c \
     $(TESTS_DIR)/test_runner.c \
     $(TESTS_DIR)/test_utilities.c
 
@@ -76,12 +77,13 @@ test: $(TEST_TARGET)
 # ------------------------------
 # Header dependencies
 # ------------------------------
-$(BUILD_DIR)/repl.o: $(SRC_DIR)/repl.h
-$(BUILD_DIR)/error.o: $(SRC_DIR)/error.h
-$(BUILD_DIR)/memory.o: $(SRC_DIR)/memory.h
-$(BUILD_DIR)/program.o: $(SRC_DIR)/program.h
-$(BUILD_DIR)/token.o: $(SRC_DIR)/token.h
-$(BUILD_DIR)/interpreter.o: $(SRC_DIR)/interpreter.h
+$(BUILD_DIR)/repl.o: $(SRC_DIR)/repl.h $(SRC_DIR)/common.h
+$(BUILD_DIR)/error.o: $(SRC_DIR)/error.h $(SRC_DIR)/common.h
+$(BUILD_DIR)/memory.o: $(SRC_DIR)/memory.h $(SRC_DIR)/common.h
+$(BUILD_DIR)/program.o: $(SRC_DIR)/program.h $(SRC_DIR)/common.h
+$(BUILD_DIR)/token.o: $(SRC_DIR)/token.h $(SRC_DIR)/common.h
+$(BUILD_DIR)/interpreter.o: $(SRC_DIR)/interpreter.h $(SRC_DIR)/common.h
+$(BUILD_DIR)/parser.o: $(SRC_DIR)/parser.h $(SRC_DIR)/common.h
 
 # ------------------------------
 # Clean rules

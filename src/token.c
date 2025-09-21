@@ -1,14 +1,16 @@
-#include <stddef.h>  // for size_t
+#include <stddef.h>
 #include "common.h"
 #include "token.h"
 
-short tokenize(const char *code, char *keyword, ParsedArg *args, int max_args) {
-    if (!code || !keyword || !args || max_args <= 0) return RESULT_ERROR;
+static inline Boolean isOperator(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/' || c == '=';
+}
 
-    // Skip leading spaces
+short tokenize(const char *code, char *keyword, ParsedArg *args, int maxArgs) {
+    if (!code || !keyword || !args || maxArgs <= 0) return RESULT_ERROR;
+
     while (isSpace(*code)) code++;
 
-    // ---- Read keyword ----
     int i = 0;
     while (*code && !isSpace(*code) && i < MAX_TOKEN_LEN - 1) {
         keyword[i++] = *code++;
@@ -17,16 +19,14 @@ short tokenize(const char *code, char *keyword, ParsedArg *args, int max_args) {
 
     while (isSpace(*code)) code++;
 
-    int arg_count = 0;
-    while (*code && arg_count < max_args) {
+    int argCount = 0;
+    while (*code && argCount < maxArgs) {
         i = 0;
 
-        // Skip multiple spaces
         if (isSpace(*code)) { code++; continue; }
 
-        ParsedArg *arg = &args[arg_count];
+        ParsedArg *arg = &args[argCount];
 
-        // ---- String literal ----
         if (*code == '"') {
             code++; // skip opening quote
             while (*code && *code != '"' && i < MAX_TOKEN_LEN - 1) {
@@ -34,21 +34,32 @@ short tokenize(const char *code, char *keyword, ParsedArg *args, int max_args) {
             }
             arg->value[i] = '\0';
             arg->type = ARG_TYPE_STRING;
-            if (*code == '"') code++; // skip closing quote
-            arg_count++;
+            if (*code == '"') code++;
+            argCount++;
             continue;
         }
 
-        // ---- Operator ----
-        if (*code == '+' || *code == '-' || *code == '*' || *code == '/' || *code == '=') {
+        if (isDigit(*code) || (*code == '-' && isDigit(*(code + 1)))) {
+            if (*code == '-') {
+                arg->value[i++] = *code++;
+            }
+            while (*code && isDigit(*code) && i < MAX_TOKEN_LEN - 1) {
+                arg->value[i++] = *code++;
+            }
+            arg->value[i] = '\0';
+            arg->type = ARG_TYPE_NUMBER;
+            argCount++;
+            continue;
+        }
+
+        if (isOperator(*code)) {
             arg->value[0] = *code++;
             arg->value[1] = '\0';
             arg->type = ARG_TYPE_OPERATOR;
-            arg_count++;
+            argCount++;
             continue;
         }
 
-        // ---- Word / variable / number ----
         while (*code && !isSpace(*code) &&
                *code != '+' && *code != '-' && *code != '*' &&
                *code != '/' && *code != '=' && *code != '"' &&
@@ -57,20 +68,10 @@ short tokenize(const char *code, char *keyword, ParsedArg *args, int max_args) {
         }
         arg->value[i] = '\0';
 
-        // Determine type
-        arg->type = ARG_TYPE_VARIABLE; // default
-        int is_num = 1;
-        for (int k = 0; arg->value[k]; k++) {
-            if (!isDigit(arg->value[k])) {
-                is_num = 0;
-                break;
-            }
-        }
-        if (is_num) arg->type = ARG_TYPE_NUMBER;
-
-        arg_count++;
+        arg->type = ARG_TYPE_VARIABLE; 
+        argCount++;
     }
 
-    return arg_count;
+    return argCount;
 }
 

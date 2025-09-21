@@ -4,7 +4,7 @@
 #include "program.h"
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>   // <-- pour free() et malloc()/strdup()
+#include <stdlib.h>
 
 #define LINE_MAX 80
 
