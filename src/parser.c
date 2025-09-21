@@ -50,8 +50,8 @@ static ResultCode parseTerm(TokenStream* ts, float* outNum) {
     while (1) {
         const ParsedArg* tok = current(ts);
         if (!tok || tok->type != ARG_TYPE_OPERATOR) break;
-        if (mini_strcmp(tok->value, "*") == 0 || mini_strcmp(tok->value, "/") == 0) {
-            char op = tok->value[0];
+        char op = tok->value[0];
+        if (op == '*' || op == '/') {
             next(ts);
             float right;
             rc = parseFactor(ts, &right, NULL);
@@ -60,7 +60,7 @@ static ResultCode parseTerm(TokenStream* ts, float* outNum) {
                 left *= right;
             }
             else {
-                if (right == 0) return RESULT_ERROR;
+                if (right == 0.0f) return RESULT_ERROR;
                 left /= right;
             }
         } 

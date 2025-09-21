@@ -17,15 +17,6 @@ typedef enum {
 } Boolean;
 
 /**
- * Check if character is alphabetic (A-Z or a-z).
- * @param c Character to check
- * @return 1 if alphabetic, 0 otherwise
- */
-static inline int isAlpha(char c) {
-    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-}
-
-/**
  * Check if character is numeric (0-9).
  * @param c Character to check
  * @return 1 if numeric, 0 otherwise
@@ -41,26 +32,6 @@ static inline int isDigit(char c) {
  */
 static inline int isSpace(char c) {
     return c == ' ' || c == '\t';
-}
-
-/**
- * Convert lowercase letter to uppercase.
- * @param c Character to convert
- * @return Uppercase character if lowercase, unchanged otherwise
- */
-static inline char toUpper(char c) {
-    if (c >= 'a' && c <= 'z') return c - 32;
-    return c;
-}
-
-/**
- * Convert uppercase letter to lowercase.
- * @param c Character to convert
- * @return Lowercase character if uppercase, unchanged otherwise
- */
-static inline char toLower(char c) {
-    if (c >= 'A' && c <= 'Z') return c + 32;
-    return c;
 }
 
 /**

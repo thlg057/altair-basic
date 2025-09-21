@@ -7,9 +7,13 @@
 #include "interpreter.h"
 #include "memory.h"
 
+// Maximum number of BASIC program lines that can be stored
 #define MAX_LINES 50
+// Maximum length of a command line (excluding line number)
 #define MAX_CMDLINE_SIZE 72
+// Maximum total length of an input line (including line number)
 #define MAX_LINE_SIZE 80
+// Maximum value for unsigned short (65535)
 #define MAX_UNSIGNED_INT 65535
 
 typedef struct {
@@ -74,14 +78,18 @@ static short findIndex(unsigned short targetLine) {
 
 static void sortProgram(void) {
     for (unsigned char i = 1; i < program.count; i++) {
-        BasicLine key = program.lines[i];
+        unsigned short key_num = program.lines[i].line_number;
+        char key_text[MAX_CMDLINE_SIZE + 1];
+        strcpy(key_text, program.lines[i].text);
+        
         char j = i - 1;
-        while (j >= 0 && program.lines[j].line_number > key.line_number) {
+        while (j >= 0 && program.lines[j].line_number > key_num) {
             program.lines[j + 1] = program.lines[j];
             j--;
         }
-
-        program.lines[j + 1] = key;
+        
+        program.lines[j + 1].line_number = key_num;
+        strcpy(program.lines[j + 1].text, key_text);
     }
 }
 

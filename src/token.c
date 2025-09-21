@@ -68,16 +68,7 @@ short tokenize(const char *code, char *keyword, ParsedArg *args, int maxArgs) {
         }
         arg->value[i] = '\0';
 
-        arg->type = ARG_TYPE_VARIABLE;
-        int isNum = 1;
-        for (int k = 0; arg->value[k]; k++) {
-            if (!isDigit(arg->value[k])) {
-                isNum = 0;
-                break;
-            }
-        }
-        if (isNum) arg->type = ARG_TYPE_NUMBER;
-
+        arg->type = ARG_TYPE_VARIABLE; 
         argCount++;
     }
 
