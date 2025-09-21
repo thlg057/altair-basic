@@ -69,9 +69,9 @@ This interpreter supports the **keywords and syntax of the early Microsoft BASIC
 ### Control Flow
 - ✅`IF <expr> THEN <line>` → conditional branching.  
 - ✅`GOTO <line>` → jump to a program line.  
-- ⏳`GOSUB <line>` / `RETURN` → subroutine calls.  
-- ⏳`FOR <var>=<start> TO <end> [STEP <n>]` → loops.  
-- ⏳`NEXT <var>` → end of loop.  
+- ~~⏳`GOSUB <line>` / `RETURN` → subroutine calls.~~
+- ✅`FOR <var>=<start> TO <end> [STEP <n>]` → loops.  
+- ✅`NEXT <var>` → end of loop.  
 
 ---
 
